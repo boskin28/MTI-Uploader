@@ -52,6 +52,7 @@ if not check_password():
     st.stop()
 
 
+
 # Initialize Pinecone
 PINECONE_API_KEY = st.secrets['PINECONE_API_KEY']
 PINECONE_API_ENV = "gcp-starter"
@@ -61,9 +62,11 @@ pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_API_ENV)
 
 # Initilize OpenAI
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
+
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 
 
+# Get text from PDF
 def get_pdf_text(pdf_docs):
     text = ""
     pdf_reader = PdfReader(pdf_docs)
@@ -71,7 +74,7 @@ def get_pdf_text(pdf_docs):
         text += page.extract_text()
     return text
 
-
+# Split text into chunks
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=2000,
@@ -80,7 +83,7 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
-
+# Upload chunks to Pinecone
 def get_vectorstore(text_chunks, pdf_name):
     text = [f'{pdf_name}: {chunk}' for chunk in text_chunks]
     meta = [{'filename' : pdf_name} for _ in range(len(text_chunks))]
@@ -88,26 +91,33 @@ def get_vectorstore(text_chunks, pdf_name):
     return vectorstore
 
 
+
+# Wepage
 def main():
     st.set_page_config(page_title="Upload Files", page_icon=":outbox_tray:")
     st.header("Upload Files :outbox_tray:")
     # st.subheader("Your documents")
-    pdf_docs = st.file_uploader(
-        "Upload your PDFs here and click on 'Process'", accept_multiple_files=True, type='pdf')
-
-    if st.button("Process"):
-        with st.spinner("Processing"):
-            for pdf in pdf_docs:
-                # get pdf text
-                raw_text = get_pdf_text(pdf)
     
-                # get the text chunks
-                text_chunks = get_text_chunks(raw_text)
+    with st.form('Uploader', clear_on_submit=True):
+        pdf_docs = st.file_uploader(
+            "Upload your PDFs here and click on 'Process'",
+            accept_multiple_files=True,
+            type='pdf'
+        )
     
-                # create vector store
-                vectorstore = get_vectorstore(text_chunks, pdf.name)
-
-        st.write('Upload complete.')
+        if st.form_submit_button("Process"):
+            with st.spinner("Processing"):
+                for pdf in pdf_docs:
+                    # get pdf text
+                    raw_text = get_pdf_text(pdf)
+        
+                    # get the text chunks
+                    text_chunks = get_text_chunks(raw_text)
+        
+                    # create vector store
+                    vectorstore = get_vectorstore(text_chunks, pdf.name)
+    
+            st.write('Upload complete.')
     
 
 if __name__ == '__main__':
