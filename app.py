@@ -1,9 +1,9 @@
 import streamlit as st
-import pinecone
+from pinecone import Pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from PyPDF2 import PdfReader
-from langchain.vectorstores import Pinecone
+from langchain_community.vectorstores import Pinecone as LcPc
 import hmac
 
 
@@ -58,7 +58,8 @@ PINECONE_API_KEY = st.secrets['PINECONE_API_KEY']
 PINECONE_API_ENV = "gcp-starter"
 index_name = "mti"
 
-pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_API_ENV)
+# pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_API_ENV)
+pc = Pinecone(api_key=PINECONE_API_KEY)
 
 # Initilize OpenAI
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
