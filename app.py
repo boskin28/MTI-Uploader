@@ -4,6 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from PyPDF2 import PdfReader
 from langchain_community.vectorstores import Pinecone as LcPc
+import hmac
 
 
 
